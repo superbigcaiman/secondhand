@@ -359,7 +359,7 @@
 
         // ⚠️ ЗАМІНІТЬ НА СВІЙ GOOGLE SHEETS CSV URL
         // Інструкція нижче в повідомленні
-        const SHEET_CSV_URL = '2PACX-1vSh15v-2kz1rc_ixJK19Y79vLwJLAW_CYRsdYyvI8UuteTdaxxl2EbkRZIxVdP1_nsfguwp9btwv-je'; // ← ЗАМІНІТЬ!
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSh15v-2kz1rc_ixJK19Y79vLwJLAW_CYRsdYyvI8UuteTdaxxl2EbkRZIxVdP1_nsfguwp9btwv-je/pub?gid=0&single=true&output=csv'; // ← ЗАМІНІТЬ!
 
         // Пароль адміністратора (ЗМІНІТЬ!)
         const ADMIN_CREDENTIALS = {
@@ -394,7 +394,7 @@
             
             try {
                 // Якщо URL не налаштований — використовуємо демо-товари
-                if (SHEET_CSV_URL === 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSh15v-2kz1rc_ixJK19Y79vLwJLAW_CYRsdYyvI8UuteTdaxxl2EbkRZIxVdP1_nsfguwp9btwv-je/pubhtml?gid=0&single=true') {
+                if (SHEET_CSV_URL === 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSh15v-2kz1rc_ixJK19Y79vLwJLAW_CYRsdYyvI8UuteTdaxxl2EbkRZIxVdP1_nsfguwp9btwv-je/pub?gid=0&single=true&output=csv') {
                     console.log('⚠️ Google Sheets URL не налаштовано. Використовую демо-товари.');
                     products = getDemoProducts();
                     renderProducts();
