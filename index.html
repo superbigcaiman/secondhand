@@ -394,7 +394,7 @@
             
             try {
                 // Якщо URL не налаштований — використовуємо демо-товари
-                if (SHEET_CSV_URL === 'ВАШ_GOOGLE_SHEET_CSV_URL') {
+                if (SHEET_CSV_URL === 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSh15v-2kz1rc_ixJK19Y79vLwJLAW_CYRsdYyvI8UuteTdaxxl2EbkRZIxVdP1_nsfguwp9btwv-je/pubhtml?gid=0&single=true') {
                     console.log('⚠️ Google Sheets URL не налаштовано. Використовую демо-товари.');
                     products = getDemoProducts();
                     renderProducts();
