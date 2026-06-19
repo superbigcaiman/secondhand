@@ -5,17 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Second Hand Shop — Вживані речі</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        (function() {
+            // ⚠️ ЗАМІНІТЬ НА СВІЙ PUBLIC KEY
+            emailjs.init('YhLo3J38YEAOp3cQA');
+        })();
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #f5f5f0; color: #1a1a1a; }
         
-        /* Header */
         header { background: #2d3436; color: white; padding: 1rem 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .header-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .logo { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
         .logo-icon { font-size: 1.8rem; }
-        .nav-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .nav-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
         .btn { padding: 0.6rem 1.2rem; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; font-size: 0.9rem; transition: all 0.2s; font-family: inherit; }
         .btn-primary { background: #00b894; color: white; }
         .btn-primary:hover { background: #00a383; transform: translateY(-1px); }
@@ -24,13 +31,17 @@
         .btn-danger { background: #e17055; color: white; }
         .btn-danger:hover { background: #d63031; }
         .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+        .btn-secondary { background: #636e72; color: white; }
+        .btn-secondary:hover { background: #4a5356; }
         
-        /* Hero */
+        .role-badge { padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .role-admin { background: #fdcb6e; color: #2d3436; }
+        .role-guest { background: #74b9ff; color: #2d3436; }
+        
         .hero { background: linear-gradient(135deg, #2d3436 0%, #636e72 100%); color: white; padding: 4rem 0; text-align: center; }
         .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; font-weight: 700; }
         .hero p { font-size: 1.1rem; opacity: 0.9; max-width: 600px; margin: 0 auto; }
         
-        /* Filters */
         .filters { background: white; padding: 1.5rem 0; border-bottom: 1px solid #e0e0e0; position: sticky; top: 70px; z-index: 90; }
         .filters-content { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
         .filter-group { display: flex; align-items: center; gap: 0.5rem; }
@@ -38,15 +49,13 @@
         .filter-group select, .filter-group input { padding: 0.5rem 1rem; border: 2px solid #dfe6e9; border-radius: 8px; font-family: inherit; background: white; min-width: 150px; }
         .filter-group input { min-width: 200px; }
         
-        /* Products Grid */
         .products-section { padding: 2rem 0 4rem; }
-        .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; color: #2d3436; }
+        .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; color: #2d3436; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
         
-        /* Product Card */
         .product-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); transition: all 0.3s; border: 1px solid #eee; }
         .product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
-        .product-image { width: 100%; height: 220px; object-fit: cover; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #b2bec3; font-size: 3rem; }
+        .product-image { width: 100%; height: 220px; object-fit: cover; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #b2bec3; font-size: 3rem; position: relative; }
         .product-image img { width: 100%; height: 100%; object-fit: cover; }
         .product-info { padding: 1.25rem; }
         .product-category { display: inline-block; background: #dfe6e9; color: #2d3436; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; }
@@ -55,9 +64,12 @@
         .product-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 1px solid #f0f0f0; }
         .product-price { font-size: 1.3rem; font-weight: 700; color: #00b894; }
         .product-price .currency { font-size: 0.9rem; }
-        .product-actions { display: flex; gap: 0.5rem; }
         
-        /* Modal */
+        .admin-controls { position: absolute; top: 10px; right: 10px; display: flex; gap: 0.5rem; }
+        .admin-btn { width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .admin-btn:hover { transform: scale(1.1); }
+        .admin-btn.delete { background: #e17055; color: white; }
+        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
         .modal-overlay.active { display: flex; }
         .modal { background: white; border-radius: 20px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 80px rgba(0,0,0,0.3); animation: modalIn 0.3s ease; }
@@ -77,38 +89,41 @@
         .image-preview img { width: 100%; height: 100%; object-fit: cover; }
         .image-preview.has-image { border-style: solid; border-color: #00b894; }
         
-        /* Order Modal */
         .order-product-preview { display: flex; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 12px; margin-bottom: 1.5rem; }
         .order-product-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
         .order-product-info h4 { font-size: 1rem; margin-bottom: 0.25rem; }
         .order-product-info .order-price { color: #00b894; font-weight: 700; font-size: 1.1rem; }
         
-        /* Cart Badge */
-        .cart-badge { position: relative; }
-        .cart-count { position: absolute; top: -8px; right: -8px; background: #e17055; color: white; font-size: 0.7rem; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .login-hint { background: #fff3cd; border: 1px solid #ffeaa7; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.9rem; color: #856404; }
         
-        /* Empty State */
         .empty-state { text-align: center; padding: 4rem 2rem; color: #636e72; }
         .empty-state-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
         .empty-state h3 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #2d3436; }
         
-        /* Toast */
+        .loading { text-align: center; padding: 3rem; color: #636e72; }
+        .loading-spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #dfe6e9; border-top-color: #00b894; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
         .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 0.5rem; }
         .toast { background: #2d3436; color: white; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: toastIn 0.3s ease; display: flex; align-items: center; gap: 0.75rem; font-weight: 500; }
         .toast.success { background: #00b894; }
         .toast.error { background: #e17055; }
         @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         
-        /* Footer */
         footer { background: #2d3436; color: white; padding: 2rem 0; text-align: center; margin-top: 2rem; }
         footer p { opacity: 0.7; font-size: 0.9rem; }
         
-        /* Responsive */
+        .admin-links { background: white; padding: 1rem 0; border-bottom: 1px solid #e0e0e0; }
+        .admin-links-content { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .admin-links a { color: #00b894; text-decoration: none; font-weight: 500; }
+        .admin-links a:hover { text-decoration: underline; }
+        
         @media (max-width: 768px) {
             .hero h1 { font-size: 1.8rem; }
             .products-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
             .form-row { grid-template-columns: 1fr; }
             .filters-content { justify-content: center; }
+            .header-content { flex-direction: column; text-align: center; }
         }
         
         .hidden { display: none !important; }
@@ -118,19 +133,27 @@
     <!-- Header -->
     <header>
         <div class="container header-content">
-            <div class="logo">
+            <div class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
                 <span class="logo-icon">♻️</span>
                 <span>Second Hand Shop</span>
             </div>
             <div class="nav-buttons">
-                <button class="btn btn-outline" onclick="openModal('addProductModal')">➕ Додати товар</button>
-                <button class="btn btn-primary cart-badge" onclick="openCart()">
-                    🛒 Кошик
-                    <span class="cart-count hidden" id="cartCount">0</span>
-                </button>
+                <span class="role-badge role-guest" id="roleBadge">Гість</span>
+                <button class="btn btn-outline hidden" id="adminAddBtn" onclick="openModal('addProductModal')">➕ Додати товар</button>
+                <button class="btn btn-outline" id="loginBtn" onclick="openModal('loginModal')">🔐 Вхід для адміна</button>
+                <button class="btn btn-outline hidden" id="logoutBtn" onclick="logout()">🚪 Вийти</button>
             </div>
         </div>
     </header>
+
+    <!-- Admin Links (only for admin) -->
+    <div class="admin-links hidden" id="adminLinks">
+        <div class="container admin-links-content">
+            <span>📋 Адмін:</span>
+            <a href="#" onclick="openSheet(); return false;">Відкрити Google Sheets</a>
+            <button class="btn btn-sm btn-secondary" onclick="loadProducts()">🔄 Оновити товари</button>
+        </div>
+    </div>
 
     <!-- Hero -->
     <section class="hero">
@@ -175,10 +198,15 @@
     <!-- Products -->
     <section class="products-section">
         <div class="container">
-            <h2 class="section-title">📦 Наші товари</h2>
-            <div class="products-grid" id="productsGrid">
-                <!-- Products will be rendered here -->
+            <div class="section-title">
+                <span>📦 Наші товари</span>
+                <span id="productsCount" style="color: #636e72; font-size: 0.9rem; font-weight: 400;"></span>
             </div>
+            <div class="loading" id="loadingState">
+                <div class="loading-spinner"></div>
+                <p>Завантаження товарів...</p>
+            </div>
+            <div class="products-grid hidden" id="productsGrid"></div>
             <div class="empty-state hidden" id="emptyState">
                 <div class="empty-state-icon">📭</div>
                 <h3>Товарів не знайдено</h3>
@@ -191,8 +219,37 @@
     <footer>
         <div class="container">
             <p>© 2026 Second Hand Shop. Всі права захищено.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem;">Замовлення відправляються адміністратору на email</p>
         </div>
     </footer>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>🔐 Вхід для адміністратора</h2>
+                <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="login-hint">
+                    ℹ️ <strong>Демо-доступ:</strong><br>
+                    Логін: <code>admin</code><br>
+                    Пароль: <code>admin123</code>
+                </div>
+                <form id="loginForm" onsubmit="login(event)">
+                    <div class="form-group">
+                        <label>Логін</label>
+                        <input type="text" id="loginUsername" required placeholder="Введіть логін">
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль</label>
+                        <input type="password" id="loginPassword" required placeholder="Введіть пароль">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.9rem; font-size: 1rem;">🔓 Увійти</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Add Product Modal -->
     <div class="modal-overlay" id="addProductModal">
@@ -232,8 +289,10 @@
                         <textarea id="productDesc" placeholder="Опишіть стан товару, розмір, колір тощо..."></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Фото товару</label>
-                        <input type="file" id="productImage" accept="image/*" onchange="previewImage(this, 'addPreview')">
+                        <label>Фото товару (URL або завантажте)</label>
+                        <input type="text" id="productImageUrl" placeholder="https://example.com/photo.jpg">
+                        <p style="font-size: 0.8rem; color: #636e72; margin-top: 0.25rem;">💡 Або завантажте фото:</p>
+                        <input type="file" id="productImage" accept="image/*" onchange="previewImage(this, 'addPreview')" style="margin-top: 0.5rem;">
                         <div class="image-preview" id="addPreview">
                             <span>📷 Завантажте фото</span>
                         </div>
@@ -252,47 +311,35 @@
                 <button class="modal-close" onclick="closeModal('orderModal')">✕</button>
             </div>
             <div class="modal-body">
-                <div class="order-product-preview" id="orderPreview">
-                    <!-- Filled dynamically -->
-                </div>
-                <form id="orderForm" onsubmit="placeOrder(event)">
+                <div class="order-product-preview" id="orderPreview"></div>
+                <form id="orderForm" onsubmit="sendOrder(event)">
                     <div class="form-group">
                         <label>Ваше ім'я *</label>
-                        <input type="text" id="customerName" required placeholder="Іван Петренко">
+                        <input type="text" name="customer_name" required placeholder="Іван Петренко">
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Телефон *</label>
-                            <input type="tel" id="customerPhone" required placeholder="+380 XX XXX XX XX">
+                            <input type="tel" name="customer_phone" required placeholder="+380 XX XXX XX XX">
                         </div>
                         <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="customerEmail" placeholder="email@example.com">
+                            <label>Email *</label>
+                            <input type="email" name="customer_email" required placeholder="email@example.com">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Адреса доставки *</label>
-                        <input type="text" id="customerAddress" required placeholder="Місто, вулиця, номер будинку">
+                        <label>Адреса доставки (Нова Пошта) *</label>
+                        <input type="text" name="customer_address" required placeholder="Місто, відділення №">
                     </div>
                     <div class="form-group">
                         <label>Коментар до замовлення</label>
-                        <textarea id="orderComment" placeholder="Додаткові побажання..."></textarea>
+                        <textarea name="order_comment" placeholder="Додаткові побажання..."></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.9rem; font-size: 1rem;">✅ Підтвердити замовлення</button>
+                    <p style="text-align: center; margin-top: 0.75rem; font-size: 0.8rem; color: #636e72;">
+                        📧 Замовлення буде відправлено адміністратору на email
+                    </p>
                 </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cart Modal -->
-    <div class="modal-overlay" id="cartModal">
-        <div class="modal" style="max-width: 600px;">
-            <div class="modal-header">
-                <h2>🛒 Кошик</h2>
-                <button class="modal-close" onclick="closeModal('cartModal')">✕</button>
-            </div>
-            <div class="modal-body" id="cartBody">
-                <!-- Cart items rendered here -->
             </div>
         </div>
     </div>
@@ -301,72 +348,252 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
-        // Data Storage
-        let products = JSON.parse(localStorage.getItem('sh_products')) || [
-            {
-                id: 1,
-                name: "Куртка демісезонна Zara",
-                price: 450,
-                category: "одяг",
-                description: "Стан ідеальний, розмір M, колір хакі. Носилась 2 сезони.",
-                image: null,
-                date: new Date('2026-05-20').toISOString()
-            },
-            {
-                id: 2,
-                name: "Кросівки Nike Air Max",
-                price: 800,
-                category: "взуття",
-                description: "Розмір 42, оригінал. Стан хороший, підошва ціла.",
-                image: null,
-                date: new Date('2026-05-22').toISOString()
-            },
-            {
-                id: 3,
-                name: "Ноутбук Lenovo ThinkPad",
-                price: 3500,
-                category: "електроніка",
-                description: "Core i5, 8GB RAM, SSD 256GB. Батарея тримає 4 години.",
-                image: null,
-                date: new Date('2026-05-25').toISOString()
-            }
-        ];
+        // ==================== КОНФІГУРАЦІЯ ====================
         
-        let cart = JSON.parse(localStorage.getItem('sh_cart')) || [];
+        // ⚠️ ЗАМІНІТЬ ЦІ ЗНАЧЕННЯ НА СВОЇ!
+        const EMAILJS_CONFIG = {
+            publicKey: 'YhLo3J38YEAOp3cQA',      // ← EmailJS Public Key
+            serviceId: 'service_f3f6yxr',      // ← EmailJS Service ID
+            templateId: 'template_lwttr6o'     // ← EmailJS Template ID
+        };
+
+        // ⚠️ ЗАМІНІТЬ НА СВІЙ GOOGLE SHEETS CSV URL
+        // Інструкція нижче в повідомленні
+        const SHEET_CSV_URL = 'e/2PACX-1vSh15v-2kz1rc_ixJK19Y79vLwJLAW_CYRsdYyvI8UuteTdaxxl2EbkRZIxVdP1_nsfguwp9btwv-je'; // ← ЗАМІНІТЬ!
+
+        // Пароль адміністратора (ЗМІНІТЬ!)
+        const ADMIN_CREDENTIALS = {
+            username: 'admin',
+            password: 'adminadmin' // ← ЗМІНІТЬ ЦЕЙ ПАРОЛЬ!
+        };
+
+        // ==================== ДАНІ ====================
+        let products = [];
+        let isAdmin = false;
         let currentOrderProduct = null;
 
-        // Initialize
+        // ==================== ІНІЦІАЛІЗАЦІЯ ====================
         document.addEventListener('DOMContentLoaded', () => {
-            renderProducts();
-            updateCartCount();
+            const adminSession = sessionStorage.getItem('sh_admin');
+            if (adminSession === 'true') {
+                isAdmin = true;
+                updateUIForAdmin();
+            }
+            loadProducts();
         });
 
-        // Save to localStorage
-        function saveProducts() {
-            localStorage.setItem('sh_products', JSON.stringify(products));
-        }
-        
-        function saveCart() {
-            localStorage.setItem('sh_cart', JSON.stringify(cart));
+        // ==================== ЗАВАНТАЖЕННЯ ТОВАРІВ З GOOGLE SHEETS ====================
+        async function loadProducts() {
+            const loadingEl = document.getElementById('loadingState');
+            const gridEl = document.getElementById('productsGrid');
+            const emptyEl = document.getElementById('emptyState');
+            
+            loadingEl.classList.remove('hidden');
+            gridEl.classList.add('hidden');
+            emptyEl.classList.add('hidden');
+            
+            try {
+                // Якщо URL не налаштований — використовуємо демо-товари
+                if (SHEET_CSV_URL === 'ВАШ_GOOGLE_SHEET_CSV_URL') {
+                    console.log('⚠️ Google Sheets URL не налаштовано. Використовую демо-товари.');
+                    products = getDemoProducts();
+                    renderProducts();
+                    return;
+                }
+                
+                const response = await fetch(SHEET_CSV_URL);
+                const csvText = await response.text();
+                products = parseCSV(csvText);
+                
+                if (products.length === 0) {
+                    products = getDemoProducts();
+                }
+                
+                renderProducts();
+                showToast('✅ Товари оновлено!', 'success');
+                
+            } catch (error) {
+                console.error('Помилка завантаження:', error);
+                showToast('❌ Помилка завантаження товарів. Використовую локальні.', 'error');
+                products = getDemoProducts();
+                renderProducts();
+            }
         }
 
-        // Render Products
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            if (lines.length < 2) return [];
+            
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            const result = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                if (values.length < 5) continue;
+                
+                const product = {};
+                headers.forEach((header, index) => {
+                    product[header] = values[index] ? values[index].replace(/^"|"$/g, '') : '';
+                });
+                
+                // Конвертуємо типи
+                result.push({
+                    id: product.id || Date.now() + i,
+                    name: product.name || '',
+                    price: parseInt(product.price) || 0,
+                    category: product.category || 'інше',
+                    description: product.description || '',
+                    image: product.image || null,
+                    date: product.date || new Date().toISOString()
+                });
+            }
+            
+            return result.reverse(); // Новіші спочатку
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            return result;
+        }
+
+        function getDemoProducts() {
+            return [
+                {
+                    id: 1,
+                    name: "Куртка демісезонна Zara",
+                    price: 450,
+                    category: "одяг",
+                    description: "Стан ідеальний, розмір M, колір хакі. Носилась 2 сезони.",
+                    image: null,
+                    date: new Date('2026-05-20').toISOString()
+                },
+                {
+                    id: 2,
+                    name: "Кросівки Nike Air Max",
+                    price: 800,
+                    category: "взуття",
+                    description: "Розмір 42, оригінал. Стан хороший, підошва ціла.",
+                    image: null,
+                    date: new Date('2026-05-22').toISOString()
+                },
+                {
+                    id: 3,
+                    name: "Ноутбук Lenovo ThinkPad",
+                    price: 3500,
+                    category: "електроніка",
+                    description: "Core i5, 8GB RAM, SSD 256GB. Батарея тримає 4 години.",
+                    image: null,
+                    date: new Date('2026-05-25').toISOString()
+                }
+            ];
+        }
+
+        // ==================== АВТОРИЗАЦІЯ ====================
+        function login(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                isAdmin = true;
+                sessionStorage.setItem('sh_admin', 'true');
+                updateUIForAdmin();
+                closeModal('loginModal');
+                document.getElementById('loginForm').reset();
+                showToast('✅ Ви увійшли як адміністратор', 'success');
+            } else {
+                showToast('❌ Невірний логін або пароль', 'error');
+            }
+        }
+        
+        function logout() {
+            isAdmin = false;
+            sessionStorage.removeItem('sh_admin');
+            updateUIForGuest();
+            showToast('🚪 Ви вийшли з акаунта', 'success');
+        }
+        
+        function updateUIForAdmin() {
+            document.getElementById('roleBadge').textContent = 'Адміністратор';
+            document.getElementById('roleBadge').className = 'role-badge role-admin';
+            document.getElementById('adminAddBtn').classList.remove('hidden');
+            document.getElementById('loginBtn').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            document.getElementById('adminLinks').classList.remove('hidden');
+            renderProducts();
+        }
+        
+        function updateUIForGuest() {
+            document.getElementById('roleBadge').textContent = 'Гість';
+            document.getElementById('roleBadge').className = 'role-badge role-guest';
+            document.getElementById('adminAddBtn').classList.add('hidden');
+            document.getElementById('loginBtn').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            document.getElementById('adminLinks').classList.add('hidden');
+            renderProducts();
+        }
+
+        function openSheet() {
+            // Відкриває Google Sheets в новій вкладці
+            const sheetId = extractSheetId(SHEET_CSV_URL);
+            if (sheetId) {
+                window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`, '_blank');
+            } else {
+                showToast('❌ URL таблиці не налаштовано', 'error');
+            }
+        }
+
+        function extractSheetId(url) {
+            const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            return match ? match[1] : null;
+        }
+
+        // ==================== ВІДОБРАЖЕННЯ ТОВАРІВ ====================
         function renderProducts() {
             const grid = document.getElementById('productsGrid');
             const emptyState = document.getElementById('emptyState');
+            const loadingEl = document.getElementById('loadingState');
+            const countEl = document.getElementById('productsCount');
             const filtered = getFilteredProducts();
+            
+            loadingEl.classList.add('hidden');
+            countEl.textContent = `Знайдено: ${filtered.length}`;
             
             if (filtered.length === 0) {
                 grid.innerHTML = '';
+                grid.classList.add('hidden');
                 emptyState.classList.remove('hidden');
                 return;
             }
             
             emptyState.classList.add('hidden');
+            grid.classList.remove('hidden');
+            
             grid.innerHTML = filtered.map(product => `
                 <div class="product-card" data-id="${product.id}">
                     <div class="product-image">
-                        ${product.image ? `<img src="${product.image}" alt="${product.name}">` : getCategoryIcon(product.category)}
+                        ${product.image ? `<img src="${product.image}" alt="${escapeHtml(product.name)}">` : getCategoryIcon(product.category)}
+                        ${isAdmin ? `
+                            <div class="admin-controls">
+                                <button class="admin-btn delete" onclick="deleteProduct('${product.id}')" title="Видалити">🗑️</button>
+                            </div>
+                        ` : ''}
                     </div>
                     <div class="product-info">
                         <span class="product-category">${getCategoryEmoji(product.category)} ${product.category}</span>
@@ -374,10 +601,7 @@
                         <p class="product-desc">${escapeHtml(product.description || 'Опис відсутній')}</p>
                         <div class="product-footer">
                             <span class="product-price">${product.price} <span class="currency">грн</span></span>
-                            <div class="product-actions">
-                                <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})" title="Видалити">🗑️</button>
-                                <button class="btn btn-sm btn-primary" onclick="openOrderModal(${product.id})">Купити</button>
-                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="openOrderModal('${product.id}')">🛒 Купити</button>
                         </div>
                     </div>
                 </div>
@@ -396,11 +620,10 @@
                 return matchesSearch && matchesCategory;
             });
             
-            // Sort
             filtered.sort((a, b) => {
                 if (sort === 'price-asc') return a.price - b.price;
                 if (sort === 'price-desc') return b.price - a.price;
-                return new Date(b.date) - new Date(a.date); // newest
+                return new Date(b.date) - new Date(a.date);
             });
             
             return filtered;
@@ -410,7 +633,6 @@
             renderProducts();
         }
 
-        // Category Helpers
         function getCategoryEmoji(cat) {
             const map = {
                 'одяг': '👕', 'взуття': '👟', 'електроніка': '📱',
@@ -424,7 +646,7 @@
             return `<span style="font-size: 4rem; opacity: 0.3;">${getCategoryEmoji(cat)}</span>`;
         }
 
-        // Image Preview
+        // ==================== ДОДАВАННЯ ТОВАРУ (АДМІН) ====================
         function previewImage(input, previewId) {
             const preview = document.getElementById(previewId);
             if (input.files && input.files[0]) {
@@ -432,180 +654,127 @@
                 reader.onload = function(e) {
                     preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
                     preview.classList.add('has-image');
+                    // Зберігаємо base64 для відправки
+                    document.getElementById('productImageUrl').value = e.target.result;
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // Add Product
-        function addProduct(e) {
+        async function addProduct(e) {
             e.preventDefault();
+            if (!isAdmin) {
+                showToast('❌ Доступ заборонено', 'error');
+                return;
+            }
+            
             const name = document.getElementById('productName').value.trim();
             const price = parseInt(document.getElementById('productPrice').value);
             const category = document.getElementById('productCategory').value;
             const description = document.getElementById('productDesc').value.trim();
-            const imageInput = document.getElementById('productImage');
+            const image = document.getElementById('productImageUrl').value || null;
             
             const product = {
-                id: Date.now(),
+                id: Date.now().toString(),
                 name,
                 price,
                 category,
                 description,
-                image: null,
+                image,
                 date: new Date().toISOString()
             };
             
-            // Handle image
-            if (imageInput.files && imageInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    product.image = evt.target.result;
-                    products.unshift(product);
-                    saveProducts();
-                    renderProducts();
-                    closeModal('addProductModal');
-                    showToast('✅ Товар успішно додано!', 'success');
-                    document.getElementById('addProductForm').reset();
-                    document.getElementById('addPreview').innerHTML = '<span>📷 Завантажте фото</span>';
-                    document.getElementById('addPreview').classList.remove('has-image');
-                };
-                reader.readAsDataURL(imageInput.files[0]);
-            } else {
-                products.unshift(product);
-                saveProducts();
-                renderProducts();
-                closeModal('addProductModal');
-                showToast('✅ Товар успішно додано!', 'success');
-                document.getElementById('addProductForm').reset();
-            }
+            // Додаємо в локальний масив
+            products.unshift(product);
+            renderProducts();
+            
+            // Показуємо інструкцію для додавання в Google Sheets
+            showToast('✅ Товар додано локально! Додайте його в Google Sheets.', 'success');
+            
+            closeModal('addProductModal');
+            resetAddForm();
+            
+            // Відкриваємо підказку
+            setTimeout(() => {
+                alert('📋 Щоб товар був видимий для всіх:\n\n1. Відкрийте Google Sheets (кнопка зверху)\n2. Додайте рядок з даними товару\n3. Натисніть 🔄 Оновити товари\n\nАбо скопіюйте цей рядок:\n\n' + 
+                    `${product.id},${product.name},${product.price},${product.category},"${product.description || ''}","${product.image || ''}",${product.date}`);
+            }, 500);
+        }
+        
+        function resetAddForm() {
+            document.getElementById('addProductForm').reset();
+            document.getElementById('addPreview').innerHTML = '<span>📷 Завантажте фото</span>';
+            document.getElementById('addPreview').classList.remove('has-image');
+            document.getElementById('productImageUrl').value = '';
         }
 
-        // Delete Product
         function deleteProduct(id) {
-            if (confirm('Ви впевнені, що хочете видалити цей товар?')) {
-                products = products.filter(p => p.id !== id);
-                cart = cart.filter(item => item.id !== id);
-                saveProducts();
-                saveCart();
+            if (!isAdmin) {
+                showToast('❌ Доступ заборонено', 'error');
+                return;
+            }
+            if (confirm('Ви впевнені, що хочете видалити цей товар?\n\n⚠️ Видалення тільки локальне. Видаліть рядок з Google Sheets вручну.')) {
+                products = products.filter(p => p.id != id);
                 renderProducts();
-                updateCartCount();
-                showToast('🗑️ Товар видалено', 'success');
+                showToast('🗑️ Товар видалено локально', 'success');
             }
         }
 
-        // Order Modal
+        // ==================== ЗАМОВЛЕННЯ (EMAILJS) ====================
         function openOrderModal(productId) {
-            const product = products.find(p => p.id === productId);
+            const product = products.find(p => p.id == productId);
             if (!product) return;
             
             currentOrderProduct = product;
             const preview = document.getElementById('orderPreview');
             preview.innerHTML = `
-                ${product.image ? `<img src="${product.image}" alt="${product.name}">` : `<div style="width:80px;height:80px;background:#f0f0f0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:2rem;">${getCategoryEmoji(product.category)}</div>`}
+                ${product.image ? `<img src="${product.image}" alt="${escapeHtml(product.name)}">` : `<div style="width:80px;height:80px;background:#f0f0f0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:2rem;">${getCategoryEmoji(product.category)}</div>`}
                 <div class="order-product-info">
                     <h4>${escapeHtml(product.name)}</h4>
                     <span class="order-price">${product.price} грн</span>
+                    <span style="color: #636e72; font-size: 0.8rem; display: block; margin-top: 0.25rem;">${getCategoryEmoji(product.category)} ${product.category}</span>
                 </div>
             `;
+            
             openModal('orderModal');
         }
 
-        // Place Order
-        function placeOrder(e) {
+        function sendOrder(e) {
             e.preventDefault();
-            if (!currentOrderProduct) return;
             
-            const order = {
-                product: currentOrderProduct,
-                customer: {
-                    name: document.getElementById('customerName').value,
-                    phone: document.getElementById('customerPhone').value,
-                    email: document.getElementById('customerEmail').value,
-                    address: document.getElementById('customerAddress').value
-                },
-                comment: document.getElementById('orderComment').value,
-                date: new Date().toISOString()
+            if (!currentOrderProduct) {
+                showToast('❌ Помилка: товар не знайдено', 'error');
+                return;
+            }
+            
+            const form = e.target;
+            
+            const templateParams = {
+                product_name: currentOrderProduct.name,
+                product_price: currentOrderProduct.price + ' грн',
+                customer_name: form.customer_name.value,
+                customer_phone: form.customer_phone.value,
+                customer_email: form.customer_email.value,
+                customer_address: form.customer_address.value,
+                order_comment: form.order_comment.value || 'Немає коментаря',
+                order_date: new Date().toLocaleString('uk-UA')
             };
             
-            // Save order to localStorage for admin view
-            const orders = JSON.parse(localStorage.getItem('sh_orders')) || [];
-            orders.push(order);
-            localStorage.setItem('sh_orders', JSON.stringify(orders));
-            
-            // Add to cart
-            cart.push({
-                id: currentOrderProduct.id,
-                name: currentOrderProduct.name,
-                price: currentOrderProduct.price,
-                image: currentOrderProduct.image,
-                category: currentOrderProduct.category,
-                orderDate: new Date().toISOString()
-            });
-            saveCart();
-            updateCartCount();
-            
-            closeModal('orderModal');
-            document.getElementById('orderForm').reset();
-            showToast('✅ Замовлення прийнято! Ми зв\'яжемося з вами.', 'success');
-            currentOrderProduct = null;
+            emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, templateParams)
+                .then(function(response) {
+                    console.log('SUCCESS!', response);
+                    closeModal('orderModal');
+                    form.reset();
+                    showToast('✅ Замовлення відправлено!', 'success');
+                    currentOrderProduct = null;
+                })
+                .catch(function(error) {
+                    console.error('FAILED...', error);
+                    showToast('❌ Помилка: ' + (error.text || error.message), 'error');
+                });
         }
 
-        // Cart
-        function openCart() {
-            const body = document.getElementById('cartBody');
-            if (cart.length === 0) {
-                body.innerHTML = `
-                    <div class="empty-state" style="padding: 2rem;">
-                        <div class="empty-state-icon">🛒</div>
-                        <h3>Кошик порожній</h3>
-                        <p>Додайте товари, щоб оформити замовлення</p>
-                    </div>
-                `;
-            } else {
-                const total = cart.reduce((sum, item) => sum + item.price, 0);
-                body.innerHTML = `
-                    <div style="max-height: 400px; overflow-y: auto; margin-bottom: 1rem;">
-                        ${cart.map((item, idx) => `
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 12px; margin-bottom: 0.75rem; align-items: center;">
-                                ${item.image ? `<img src="${item.image}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">` : `<div style="width:60px;height:60px;background:#e0e0e0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">${getCategoryEmoji(item.category)}</div>`}
-                                <div style="flex: 1;">
-                                    <h4 style="font-size: 0.95rem; margin-bottom: 0.25rem;">${escapeHtml(item.name)}</h4>
-                                    <span style="color: #00b894; font-weight: 700;">${item.price} грн</span>
-                                </div>
-                                <button class="btn btn-sm btn-danger" onclick="removeFromCart(${idx})">✕</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div style="border-top: 2px solid #f0f0f0; padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 1.1rem; font-weight: 600;">Разом:</span>
-                        <span style="font-size: 1.3rem; font-weight: 700; color: #00b894;">${total} грн</span>
-                    </div>
-                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.9rem;" onclick="showToast('📞 Зв\'яжіться з нами для підтвердження замовлення', 'success')">Оформити всі замовлення</button>
-                `;
-            }
-            openModal('cartModal');
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            saveCart();
-            updateCartCount();
-            openCart(); // Refresh
-            showToast('Товар видалено з кошика', 'success');
-        }
-
-        function updateCartCount() {
-            const badge = document.getElementById('cartCount');
-            if (cart.length > 0) {
-                badge.textContent = cart.length;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-        }
-
-        // Modal Controls
+        // ==================== МОДАЛКИ ====================
         function openModal(id) {
             document.getElementById(id).classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -616,7 +785,6 @@
             document.body.style.overflow = '';
         }
 
-        // Close modal on overlay click
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) {
@@ -626,7 +794,7 @@
             });
         });
 
-        // Toast
+        // ==================== TOAST ====================
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -638,10 +806,9 @@
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateX(100%)';
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 4000);
         }
 
-        // Escape HTML
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
@@ -649,7 +816,6 @@
             return div.innerHTML;
         }
 
-        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 document.querySelectorAll('.modal-overlay.active').forEach(m => {
