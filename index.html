@@ -54,8 +54,52 @@
         
         .product-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); transition: all 0.3s; border: 1px solid #eee; }
         .product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
-        .product-image { width: 100%; height: 220px; object-fit: cover; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #b2bec3; font-size: 3rem; position: relative; }
-        .product-image img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* ===== НОВЕ: стилі для фото з курсором-збільшенням ===== */
+        .product-image { 
+            width: 100%; 
+            height: 220px; 
+            object-fit: cover; 
+            background: #f0f0f0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: #b2bec3; 
+            font-size: 3rem; 
+            position: relative; 
+            overflow: hidden;
+        }
+        .product-image img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            cursor: zoom-in; /* НОВЕ: курсор збільшення */
+            transition: transform 0.3s ease;
+        }
+        .product-image:hover img {
+            transform: scale(1.05); /* НОВЕ: легке збільшення при наведенні */
+        }
+        .product-image .zoom-icon {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .product-image:hover .zoom-icon {
+            opacity: 1; /* НОВЕ: іконка з'являється при наведенні */
+        }
+        
         .product-info { padding: 1.25rem; }
         .product-category { display: inline-block; background: #dfe6e9; color: #2d3436; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; }
         .product-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: #2d3436; line-height: 1.3; }
@@ -68,6 +112,92 @@
         .admin-btn { width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
         .admin-btn:hover { transform: scale(1.1); }
         .admin-btn.delete { background: #e17055; color: white; }
+        
+        /* ===== НОВЕ: ЛАЙТБОКС для перегляду фото ===== */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            cursor: zoom-out;
+        }
+        .lightbox-overlay.active {
+            display: flex;
+        }
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .lightbox-image {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .lightbox-caption {
+            color: white;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            text-align: center;
+            max-width: 600px;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lightbox-close:hover {
+            color: #e17055;
+        }
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .lightbox-nav:hover {
+            background: rgba(255,255,255,0.4);
+        }
+        .lightbox-prev {
+            left: 20px;
+        }
+        .lightbox-next {
+            right: 20px;
+        }
+        /* ===== КІНЕЦЬ НОВОГО ===== */
         
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
         .modal-overlay.active { display: flex; }
@@ -123,6 +253,7 @@
             .form-row { grid-template-columns: 1fr; }
             .filters-content { justify-content: center; }
             .header-content { flex-direction: column; text-align: center; }
+            .lightbox-nav { display: none; } /* НОВЕ: ховаємо стрілки на мобільному */
         }
         
         .hidden { display: none !important; }
@@ -213,6 +344,18 @@
             </div>
         </div>
     </section>
+
+    <!-- ===== НОВЕ: ЛАЙТБОКС ДЛЯ ПЕРЕГЛЯДУ ФОТО ===== -->
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+            <button class="lightbox-nav lightbox-prev" onclick="navigateLightbox(-1)">‹</button>
+            <button class="lightbox-nav lightbox-next" onclick="navigateLightbox(1)">›</button>
+            <img class="lightbox-image" id="lightboxImage" src="" alt="">
+            <div class="lightbox-caption" id="lightboxCaption"></div>
+        </div>
+    </div>
+    <!-- ===== КІНЕЦЬ НОВОГО ===== -->
 
     <!-- Footer -->
     <footer>
@@ -352,20 +495,25 @@
         const EMAILJS_CONFIG = {
             publicKey: 'YhLo3J38YEAOp3cQA',
             serviceId: 'service_f3f6yxr',
-            templateId: 'template_lwttr6o'
+            templateId: 'template_lwtt6ro'
         };
 
-        const API_URL = 'https://script.google.com/macros/s/AKfycbziPkmeKJutvwqxKzqf-je0eZbzS_gtACoimPjQIG-RtFb6Vaf2My0BbCu4ZJkVyiUVKw/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwmZFP4srayIA2N1IBR9rc7ILKfk9w2sNbU0Yl276OElqAVr_UIVOc88XSUL9LSBixWOQ/exec';
 
         const ADMIN_CREDENTIALS = {
             username: 'admin',
-            password: 'adminadmin'
+            password: 'admin123'
         };
 
         // ==================== ДАНІ ====================
         let products = [];
         let isAdmin = false;
         let currentOrderProduct = null;
+        
+        // ===== НОВЕ: змінні для лайтбокса =====
+        let lightboxProducts = []; // товари з фото
+        let currentLightboxIndex = 0;
+        // ===== КІНЕЦЬ НОВОГО =====
 
         // ==================== ІНІЦІАЛІЗАЦІЯ ====================
         document.addEventListener('DOMContentLoaded', () => {
@@ -513,10 +661,20 @@
             emptyState.classList.add('hidden');
             grid.classList.remove('hidden');
             
-            grid.innerHTML = filtered.map(product => `
+            // ===== НОВЕ: збираємо товари з фото для лайтбокса =====
+            lightboxProducts = filtered.filter(p => p.image);
+            // ===== КІНЕЦЬ НОВОГО =====
+            
+            grid.innerHTML = filtered.map((product, index) => `
                 <div class="product-card" data-id="${product.id}">
                     <div class="product-image">
-                        ${product.image ? `<img src="${product.image}" alt="${escapeHtml(product.name)}">` : getCategoryIcon(product.category)}
+                        ${product.image ? `
+                            <img src="${product.image}" 
+                                 alt="${escapeHtml(product.name)}"
+                                 onclick="openLightbox('${product.id}')"
+                                 title="Натисніть для збільшення">
+                            <div class="zoom-icon">🔍</div>
+                        ` : getCategoryIcon(product.category)}
                         ${isAdmin ? `
                             <div class="admin-controls">
                                 <button class="admin-btn delete" onclick="deleteProduct('${product.id}')" title="Видалити">🗑️</button>
@@ -573,6 +731,58 @@
         function getCategoryIcon(cat) {
             return `<span style="font-size: 4rem; opacity: 0.3;">${getCategoryEmoji(cat)}</span>`;
         }
+
+        // ===== НОВЕ: ФУНКЦІЇ ЛАЙТБОКСА =====
+        function openLightbox(productId) {
+            const product = products.find(p => p.id == productId);
+            if (!product || !product.image) return;
+            
+            // Знаходимо індекс в масиві товарів з фото
+            currentLightboxIndex = lightboxProducts.findIndex(p => p.id == productId);
+            if (currentLightboxIndex === -1) currentLightboxIndex = 0;
+            
+            updateLightbox();
+            document.getElementById('lightbox').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function updateLightbox() {
+            const product = lightboxProducts[currentLightboxIndex];
+            if (!product) return;
+            
+            document.getElementById('lightboxImage').src = product.image;
+            document.getElementById('lightboxCaption').innerHTML = 
+                `<strong>${escapeHtml(product.name)}</strong> — ${product.price} грн<br>
+                 <small>${getCategoryEmoji(product.category)} ${product.category}</small>`;
+            
+            // Показуємо/ховаємо стрілки навігації
+            const prevBtn = document.querySelector('.lightbox-prev');
+            const nextBtn = document.querySelector('.lightbox-next');
+            
+            prevBtn.style.display = lightboxProducts.length > 1 ? 'flex' : 'none';
+            nextBtn.style.display = lightboxProducts.length > 1 ? 'flex' : 'none';
+        }
+        
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        function navigateLightbox(direction) {
+            if (lightboxProducts.length <= 1) return;
+            
+            currentLightboxIndex += direction;
+            
+            // Циклічна навігація
+            if (currentLightboxIndex < 0) {
+                currentLightboxIndex = lightboxProducts.length - 1;
+            } else if (currentLightboxIndex >= lightboxProducts.length) {
+                currentLightboxIndex = 0;
+            }
+            
+            updateLightbox();
+        }
+        // ===== КІНЕЦЬ НОВОГО =====
 
         // ==================== ДОДАВАННЯ ТОВАРУ ====================
         function previewImage(input, previewId) {
@@ -764,14 +974,28 @@
             return div.innerHTML;
         }
 
+        // ===== НОВЕ: клавіатурна навігація лайтбокса =====
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                // Закриваємо лайтбокс
+                if (document.getElementById('lightbox').classList.contains('active')) {
+                    closeLightbox();
+                    return;
+                }
+                // Закриваємо модалки
                 document.querySelectorAll('.modal-overlay.active').forEach(m => {
                     m.classList.remove('active');
                 });
                 document.body.style.overflow = '';
             }
+            
+            // Стрілки для навігації в лайтбоксі
+            if (document.getElementById('lightbox').classList.contains('active')) {
+                if (e.key === 'ArrowLeft') navigateLightbox(-1);
+                if (e.key === 'ArrowRight') navigateLightbox(1);
+            }
         });
+        // ===== КІНЕЦЬ НОВОГО =====
     </script>
 </body>
 </html>
