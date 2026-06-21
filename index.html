@@ -519,40 +519,36 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
-        // ==================== КОНФІГУРАЦІЯ ====================
-        
-        const EMAILJS_CONFIG = {
-            publicKey: 'YhLo3J38YEAOp3cQA',
-            serviceId: 'service_f3f6yxr',
-            templateId: 'template_lwtt6ro'
-        };
+       // ==================== КОНФІГУРАЦІЯ ====================
 
-        // ⚠️ ЗАМІНІТЬ НА ВАШІ РЕАЛЬНІ ЗНАЧЕННЯ!
-        // Як отримати: створіть Google Form → відкрийте в режимі перегляду → F12 → Network → заповніть форму → знайдіть formResponse → скопіюйте entry.XXXXX
-        const GOOGLE_FORM_CONFIG = {
-            formId: '1FAIpQLScs8r7FHnR3oK12ANR3S_E2m89Nu59vGeYX-F2SWoMaaeQcag',
+const EMAILJS_CONFIG = {
+    publicKey: 'YhLo3J38YEAOp3cQA',
+    serviceId: 'service_f3f6yxr',
+    templateId: 'template_lwtt6ro'
+};
+
+const GOOGLE_FORM_CONFIG = {
+    formId: '1FAIpQLScs8r7FHnR3oK12ANR3S_E2m89Nu59vGeYX-F2SWoMaaeQcag',
     
-            fields: {
+    fields: {
         name: 'entry.1785796852',      // Назва товару
         price: 'entry.1422060522',      // Ціна (грн)
         category: 'entry.504676661',    // Категорія
         description: 'entry.434172961',   // Опис товару
         image: 'entry.1332472942',      // URL фото
         date: 'entry.466628847'         // Дата додавання
-        }
-    };
+    }
+};
 
-        // URL для відправки форми
-        const GOOGLE_FORM_URL = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_CONFIG.formId}/formResponse`;
+const GOOGLE_FORM_URL = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_CONFIG.formId}/formResponse`;
 
-        // ⚠️ ЗАМІНІТЬ НА ВАШЕ ПОСИЛАННЯ З CSV
-        // Як отримати: Google Sheets → Файл → Поділитися → Опублікувати в Інтернеті → CSV
-        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQxPDm_FYfD-Ududwzm89yRP0oI8KcxEy5mPAcSwI0_e5_Cj1yUDco5GYZ765VXAs2l6xsJHJEO4I9h/pub?output=csv';
+// ⚠️ ЗАМІНІТЬ НА ВАШЕ ПОСИЛАННЯ З CSV
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQxPDm_FYfD-Ududwzm89yRP0oI8KcxEy5mPAcSwI0_e5_Cj1yUDco5GYZ765VXAs2l6xsJHJEO4I9h/pub?output=csv';
 
-        const ADMIN_CREDENTIALS = {
-            username: 'admin',
-            password: 'adminadmin'
-        };
+const ADMIN_CREDENTIALS = {
+    username: 'admin',
+    password: 'adminadmin'
+};
 
         // CORS-проксі для завантаження CSV з Google Sheets
         const CORS_PROXIES = [
