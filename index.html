@@ -257,23 +257,6 @@
             color: #2e7d32;
         }
         
-        .config-notice {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            font-size: 0.85rem;
-            color: #856404;
-        }
-        
-        .config-notice code {
-            background: rgba(0,0,0,0.05);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            font-family: monospace;
-        }
-        
         @media (max-width: 768px) {
             .hero h1 { font-size: 1.8rem; }
             .products-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
@@ -412,7 +395,6 @@
         </div>
     </div>
 
-    <!-- Модальне вікно додавання через Google Form -->
     <div class="modal-overlay" id="addProductModal">
         <div class="modal">
             <div class="modal-header">
@@ -422,10 +404,6 @@
             <div class="modal-body">
                 <div class="add-form-notice">
                     ✅ Товар буде автоматично додано в таблицю та на сайт!
-                </div>
-                <div class="config-notice" id="formConfigNotice">
-                    ⚠️ <strong>Важливо!</strong> Спочатку налаштуйте Google Form у коді сайту.<br>
-                    Знайдіть у коді <code>GOOGLE_FORM_CONFIG</code> та вставте свої значення.
                 </div>
                 <form id="addProductForm" onsubmit="addProductViaForm(event)">
                     <div class="form-group">
@@ -519,38 +497,39 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
-       // ==================== КОНФІГУРАЦІЯ ====================
+        // ==================== КОНФІГУРАЦІЯ ====================
+        
+        const EMAILJS_CONFIG = {
+            publicKey: 'YhLo3J38YEAOp3cQA',
+            serviceId: 'service_f3f6yxr',
+            templateId: 'template_lwtt6ro'
+        };
 
-const EMAILJS_CONFIG = {
-    publicKey: 'YhLo3J38YEAOp3cQA',
-    serviceId: 'service_f3f6yxr',
-    templateId: 'template_lwtt6ro'
-};
+        // ✅ ВАШІ РЕАЛЬНІ ЗНАЧЕННЯ
+        const GOOGLE_FORM_CONFIG = {
+            formId: '1FAIpQLScs8r7FHnR3oK12ANR3S_E2m89Nu59vGeYX-F2SWoMaaeQcag',
+            
+            fields: {
+                name: 'entry.1785796852',      // Назва товару
+                price: 'entry.1422060522',      // Ціна (грн)
+                category: 'entry.466628847',    // Категорія
+                description: 'entry.504676661',   // Опис товару
+                image: 'entry.434172961',       // URL фото
+                date: 'entry.1332472942'        // Дата додавання
+            }
+        };
 
-const GOOGLE_FORM_CONFIG = {
-    formId: '1FAIpQLScs8r7FHnR3oK12ANR3S_E2m89Nu59vGeYX-F2SWoMaaeQcag',
-    
-    fields: {
-        name: 'entry.1785796852',      // Назва товару
-        price: 'entry.1422060522',      // Ціна (грн)
-        category: 'entry.504676661',    // Категорія
-        description: 'entry.434172961',   // Опис товару
-        image: 'entry.1332472942',      // URL фото
-        date: 'entry.466628847'         // Дата додавання
-    }
-};
+        const GOOGLE_FORM_URL = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_CONFIG.formId}/formResponse`;
 
-const GOOGLE_FORM_URL = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_CONFIG.formId}/formResponse`;
+        // ✅ ВАШ CSV URL
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQxPDm_FYfD-Ududwzm89yRP0oI8KcxEy5mPAcSwI0_e5_Cj1yUDco5GYZ765VXAs2l6xsJHJEO4I9h/pub?output=csv';
 
-// ⚠️ ЗАМІНІТЬ НА ВАШЕ ПОСИЛАННЯ З CSV
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQxPDm_FYfD-Ududwzm89yRP0oI8KcxEy5mPAcSwI0_e5_Cj1yUDco5GYZ765VXAs2l6xsJHJEO4I9h/pub?output=csv';
+        const ADMIN_CREDENTIALS = {
+            username: 'admin',
+            password: 'adminadmin'
+        };
 
-const ADMIN_CREDENTIALS = {
-    username: 'admin',
-    password: 'adminadmin'
-};
-
-        // CORS-проксі для завантаження CSV з Google Sheets
+        // CORS-проксі для завантаження CSV
         const CORS_PROXIES = [
             'https://api.allorigins.win/raw?url=',
             'https://corsproxy.io/?',
@@ -579,9 +558,9 @@ const ADMIN_CREDENTIALS = {
         async function loadProducts() {
             showLoading(true);
             
-            // Спочатку пробуємо завантажити з Google Sheets
             let loaded = false;
             
+            // Пробуємо завантажити з Google Sheets
             if (SHEET_CSV_URL && !SHEET_CSV_URL.includes('XXXXXXXX')) {
                 for (const proxy of CORS_PROXIES) {
                     try {
@@ -609,18 +588,16 @@ const ADMIN_CREDENTIALS = {
                 }
             }
             
-            // Якщо не вдалося завантажити — беремо з кешу або демо-дані
+            // Якщо не вдалося — беремо з кешу або демо-дані
             if (!loaded) {
                 const cached = localStorage.getItem('sh_products_cache');
-                const cacheTime = localStorage.getItem('sh_products_cache_time');
                 
                 if (cached) {
                     products = JSON.parse(cached);
                     showToast('📦 Показано кешовані товари', 'success');
                 } else {
-                    // Демо-дані для тестування
                     products = getDemoProducts();
-                    showToast('⚠️ Використано демо-дані. Налаштуйте Google Sheets!', 'error');
+                    showToast('⚠️ Використано демо-дані', 'error');
                 }
             }
             
@@ -639,21 +616,17 @@ const ADMIN_CREDENTIALS = {
                 const values = parseCSVLine(lines[i]);
                 if (values.length < 2) continue;
                 
-                const row = {};
-                headers.forEach((header, index) => {
-                    row[header.trim().toLowerCase()] = values[index] ? values[index].trim() : '';
-                });
-                
-                // Мапінг полів (адаптуйте під свої назви колонок)
+                // Мапінг за індексами колонок (адаптовано під вашу таблицю)
+                // A: Позначка часу, B: Назва, C: Ціна, D: Категорія, E: Опис, F: URL фото, G: Дата, H: status
                 const product = {
-                    id: row['id'] || String(Date.now() + i),
-                    name: row['name'] || row['назва'] || row['title'] || 'Без назви',
-                    price: parseFloat(row['price'] || row['ціна'] || row['вартість'] || 0) || 0,
-                    category: row['category'] || row['категорія'] || 'інше',
-                    description: row['description'] || row['опис'] || row['desc'] || '',
-                    image: row['image'] || row['фото'] || row['img'] || row['url'] || '',
-                    date: row['date'] || row['дата'] || new Date().toISOString(),
-                    status: row['status'] || row['статус'] || 'active'
+                    id: String(Date.now() + i),
+                    name: values[1] ? values[1].trim() : 'Без назви',
+                    price: parseFloat(values[2]) || 0,
+                    category: values[3] ? values[3].trim().toLowerCase() : 'інше',
+                    description: values[4] ? values[4].trim() : '',
+                    image: values[5] ? values[5].trim() : '',
+                    date: values[6] ? values[6].trim() : new Date().toISOString(),
+                    status: values[7] ? values[7].trim().toLowerCase() : 'active'
                 };
                 
                 if (product.name && product.name !== 'Без назви') {
@@ -676,7 +649,7 @@ const ADMIN_CREDENTIALS = {
                 if (char === '"') {
                     if (inQuotes && nextChar === '"') {
                         current += '"';
-                        i++; // skip next quote
+                        i++;
                     } else {
                         inQuotes = !inQuotes;
                     }
@@ -699,9 +672,9 @@ const ADMIN_CREDENTIALS = {
                     name: 'Куртка зимова Columbia',
                     price: 1200,
                     category: 'одяг',
-                    description: 'Стан відмінний, розмір L, колір чорний. Носив 1 сезон.',
+                    description: 'Стан відмінний, розмір L, колір чорний.',
                     image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400',
-                    date: '2026-06-15T10:00:00Z',
+                    date: '2026-06-15',
                     status: 'active'
                 },
                 {
@@ -711,38 +684,8 @@ const ADMIN_CREDENTIALS = {
                     category: 'взуття',
                     description: 'Розмір 42, білі, оригінал. Стан 9/10.',
                     image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400',
-                    date: '2026-06-14T15:30:00Z',
+                    date: '2026-06-14',
                     status: 'active'
-                },
-                {
-                    id: '3',
-                    name: 'iPhone 12 64GB',
-                    price: 8500,
-                    category: 'електроніка',
-                    description: 'Акумулятор 87%, ідеальний стан, повний комплект.',
-                    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400',
-                    date: '2026-06-13T09:00:00Z',
-                    status: 'active'
-                },
-                {
-                    id: '4',
-                    name: 'Крісло IKEA POÄNG',
-                    price: 1500,
-                    category: 'меблі',
-                    description: 'Бук + бежевий чохол. Мінімальні сліди використання.',
-                    image: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400',
-                    date: '2026-06-12T14:00:00Z',
-                    status: 'active'
-                },
-                {
-                    id: '5',
-                    name: 'Гаррі Поттер. Повна колекція',
-                    price: 450,
-                    category: 'книги',
-                    description: '7 книг, тверда обкладинка, стан добрий.',
-                    image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400',
-                    date: '2026-06-11T11:00:00Z',
-                    status: 'sold'
                 }
             ];
         }
@@ -800,7 +743,6 @@ const ADMIN_CREDENTIALS = {
                 `;
             }).join('');
             
-            // Оновлюємо lightbox масив
             lightboxProducts = filtered.filter(p => p.image && p.status !== 'sold');
         }
 
@@ -817,7 +759,6 @@ const ADMIN_CREDENTIALS = {
                 return matchesSearch && matchesCategory;
             });
             
-            // Сортування
             filtered.sort((a, b) => {
                 switch(sort) {
                     case 'price-asc': return a.price - b.price;
@@ -915,30 +856,17 @@ const ADMIN_CREDENTIALS = {
             document.getElementById('loginBtn').classList.toggle('hidden', isAdmin);
             document.getElementById('logoutBtn').classList.toggle('hidden', !isAdmin);
             document.getElementById('adminLinks').classList.toggle('hidden', !isAdmin);
-            
-            // Перерендерити товари для показу кнопок адміна
             renderProducts();
-            
-            // Показати/приховати повідомлення про налаштування
-            const configNotice = document.getElementById('formConfigNotice');
-            if (configNotice) {
-                const isConfigured = GOOGLE_FORM_CONFIG.formId && !GOOGLE_FORM_CONFIG.formId.includes('XXXX');
-                configNotice.classList.toggle('hidden', isConfigured);
-            }
         }
 
         function deleteProduct(id, event) {
             event.stopPropagation();
             if (!confirm('Ви впевнені, що хочете видалити цей товар?')) return;
             
-            // Видаляємо з локального масиву
             products = products.filter(p => p.id !== id);
-            
-            // Оновлюємо кеш
             localStorage.setItem('sh_products_cache', JSON.stringify(products));
-            
             renderProducts();
-            showToast('🗑️ Товар видалено', 'success');
+            showToast('🗑️ Товар видалено (локально)', 'success');
         }
 
         function toggleSold(id, event) {
@@ -957,12 +885,6 @@ const ADMIN_CREDENTIALS = {
         async function addProductViaForm(e) {
             e.preventDefault();
             
-            // Перевірка конфігурації
-            if (!GOOGLE_FORM_CONFIG.formId || GOOGLE_FORM_CONFIG.formId.includes('XXXX')) {
-                showToast('⚠️ Спочатку налаштуйте Google Form у коді сайту!', 'error');
-                return;
-            }
-            
             const name = document.getElementById('productName').value;
             const price = document.getElementById('productPrice').value;
             const category = document.getElementById('productCategory').value;
@@ -972,11 +894,9 @@ const ADMIN_CREDENTIALS = {
             
             let finalImageUrl = imageUrl;
             
-            // Якщо завантажено файл — конвертуємо в base64 (або завантажуємо на imgur)
             if (imageFile && !imageUrl) {
                 try {
                     finalImageUrl = await convertFileToBase64(imageFile);
-                    showToast('📷 Фото конвертовано в base64', 'success');
                 } catch (err) {
                     showToast('❌ Помилка обробки фото', 'error');
                     return;
@@ -995,10 +915,9 @@ const ADMIN_CREDENTIALS = {
             showToast('⏳ Відправка даних...', 'success');
             
             try {
-                // Відправляємо через невидимий iframe (обхід CORS)
                 await submitFormViaIframe(formData);
                 
-                // Також додаємо локально для миттєвого відображення
+                // Додаємо локально для миттєвого відображення
                 const newProduct = {
                     id: String(Date.now()),
                     name,
@@ -1019,16 +938,15 @@ const ADMIN_CREDENTIALS = {
                 document.getElementById('addPreview').classList.remove('has-image');
                 
                 renderProducts();
-                showToast('✅ Товар додано! Оновлення з Google Sheets через 10-30 секунд.', 'success');
+                showToast('✅ Товар додано! Оновлення з Google Sheets через 10-30 сек.', 'success');
                 
             } catch (err) {
-                console.error('Form submit error:', err);
                 showToast('⚠️ Можливо, товар додано. Перевірте Google Sheets.', 'success');
             }
         }
 
         function submitFormViaIframe(formData) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 const iframe = document.createElement('iframe');
                 iframe.name = 'google-form-iframe-' + Date.now();
                 iframe.style.display = 'none';
@@ -1059,13 +977,6 @@ const ADMIN_CREDENTIALS = {
                             document.body.removeChild(iframe);
                             document.body.removeChild(form);
                         }, 1000);
-                    }
-                };
-                
-                iframe.onerror = () => {
-                    if (!resolved) {
-                        resolved = true;
-                        resolve(); // Все одно вважаємо успіхом
                     }
                 };
                 
@@ -1147,7 +1058,6 @@ const ADMIN_CREDENTIALS = {
             showToast('⏳ Відправка замовлення...', 'success');
             
             try {
-                // EmailJS відправка
                 await emailjs.send(
                     EMAILJS_CONFIG.serviceId,
                     EMAILJS_CONFIG.templateId,
@@ -1155,7 +1065,6 @@ const ADMIN_CREDENTIALS = {
                     EMAILJS_CONFIG.publicKey
                 );
                 
-                // Позначаємо товар як проданий локально
                 currentOrderProduct.status = 'sold';
                 localStorage.setItem('sh_products_cache', JSON.stringify(products));
                 
@@ -1168,7 +1077,6 @@ const ADMIN_CREDENTIALS = {
             } catch (error) {
                 console.error('EmailJS error:', error);
                 
-                // Fallback: відкриваємо mailto
                 const subject = `Замовлення: ${currentOrderProduct.name}`;
                 const body = `
 Ім'я: ${orderData.customer_name}
@@ -1198,7 +1106,6 @@ Email: ${orderData.customer_email}
             document.body.style.overflow = '';
         }
 
-        // Закриття по кліку на оверлей
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) {
@@ -1208,7 +1115,6 @@ Email: ${orderData.customer_email}
             });
         });
 
-        // Escape для закриття
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 document.querySelectorAll('.modal-overlay.active, .lightbox-overlay.active').forEach(el => {
@@ -1217,7 +1123,6 @@ Email: ${orderData.customer_email}
                 document.body.style.overflow = '';
             }
             
-            // Навігація lightbox стрілками
             if (document.getElementById('lightbox').classList.contains('active')) {
                 if (e.key === 'ArrowLeft') navigateLightbox(-1);
                 if (e.key === 'ArrowRight') navigateLightbox(1);
@@ -1244,7 +1149,6 @@ Email: ${orderData.customer_email}
         // ==================== ДОПОМІЖНІ ФУНКЦІЇ ====================
         
         function openSheet() {
-            // Витягуємо ID таблиці з URL
             const match = SHEET_CSV_URL.match(/\/d\/e\/([a-zA-Z0-9_-]+)/);
             if (match) {
                 window.open(`https://docs.google.com/spreadsheets/d/e/${match[1]}/pubhtml`, '_blank');
@@ -1254,27 +1158,21 @@ Email: ${orderData.customer_email}
         }
 
         function openForm() {
-            if (GOOGLE_FORM_CONFIG.formId && !GOOGLE_FORM_CONFIG.formId.includes('XXXX')) {
-                window.open(`https://docs.google.com/forms/d/e/${GOOGLE_FORM_CONFIG.formId}/viewform`, '_blank');
-            } else {
-                showToast('⚠️ Спочатку налаштуйте Google Form', 'error');
-            }
+            window.open(`https://docs.google.com/forms/d/e/${GOOGLE_FORM_CONFIG.formId}/viewform`, '_blank');
         }
 
         // ==================== АВТООНОВЛЕННЯ ====================
         
-        // Оновлюємо товари кожні 5 хвилин
         setInterval(() => {
             if (!document.hidden) {
                 loadProducts();
             }
         }, 300000);
 
-        // Оновлення при поверненні на вкладку
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 const lastUpdate = parseInt(localStorage.getItem('sh_products_cache_time') || '0');
-                if (Date.now() - lastUpdate > 60000) { // Оновлюємо якщо пройшла хвилина
+                if (Date.now() - lastUpdate > 60000) {
                     loadProducts();
                 }
             }
