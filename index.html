@@ -530,26 +530,24 @@
         // ⚠️ ЗАМІНІТЬ НА ВАШІ РЕАЛЬНІ ЗНАЧЕННЯ!
         // Як отримати: створіть Google Form → відкрийте в режимі перегляду → F12 → Network → заповніть форму → знайдіть formResponse → скопіюйте entry.XXXXX
         const GOOGLE_FORM_CONFIG = {
-            // ID вашої Google Form (з URL: https://docs.google.com/forms/d/e/1FAIpQLSfXXXXX/formResponse)
-            formId: '1FAIpQLSfXXXXXXXXXXXXXXXXXXXXXXXXXX',
-            
-            // ID полів (entry.XXXXX) - знайдіть через F12 → Network
+            formId: '1FAIpQLScs8r7FHnR3oK12ANR3S_E2m89Nu59vGeYX-F2SWoMaaeQcag',
+    
             fields: {
-                name: 'entry.1234567890',      // Назва товару
-                price: 'entry.2345678901',      // Ціна
-                category: 'entry.3456789012',   // Категорія
-                description: 'entry.4567890123',  // Опис
-                image: 'entry.5678901234',      // URL фото
-                date: 'entry.6789012345'         // Дата (опціонально)
-            }
-        };
+        name: 'entry.1785796852',      // Назва товару
+        price: 'entry.1422060522',      // Ціна (грн)
+        category: 'entry.504676661',    // Категорія
+        description: 'entry.434172961',   // Опис товару
+        image: 'entry.1332472942',      // URL фото
+        date: 'entry.466628847'         // Дата додавання
+        }
+    };
 
         // URL для відправки форми
         const GOOGLE_FORM_URL = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_CONFIG.formId}/formResponse`;
 
         // ⚠️ ЗАМІНІТЬ НА ВАШЕ ПОСИЛАННЯ З CSV
         // Як отримати: Google Sheets → Файл → Поділитися → Опублікувати в Інтернеті → CSV
-        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSh15v-2kz1rc_ixJK19Y79vLwJLAW_CYRsdYyvI8UuteTdaxxl2EbkRZIxVdP1_nsfguwp9btwv-je/pub?output=csv';
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQxPDm_FYfD-Ududwzm89yRP0oI8KcxEy5mPAcSwI0_e5_Cj1yUDco5GYZ765VXAs2l6xsJHJEO4I9h/pub?output=csv';
 
         const ADMIN_CREDENTIALS = {
             username: 'admin',
