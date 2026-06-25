@@ -549,16 +549,32 @@
         });
 
         // ==================== ЗАВАНТАЖЕННЯ ТОВАРІВ ====================
-        
         async function loadProducts() {
             showLoading(true);
-            
+    
             let loaded = false;
+    
+            try {
+                // Спробуємо через Netlify Function
+                const response = await fetch('/.netlify/functions/get-products');
+        
+                if (response.ok) {
+                    const csvText = await response.text();
+                    products = parseCSV(csvText);
+                    
+                    localStorage.setItem('sh_products_cache', JSON.stringify(products));
+                    localStorage.setItem('sh_products_cache_time', Date.now().toString());
+                    
+                    loaded = true;
+                    showToast('✅ Товари оновлено', 'success');
+                }
+            } catch (e) {
+                console.log('Netlify function failed:', e.message);
+            }
             
-            if (SHEET_CSV_URL && !SHEET_CSV_URL.includes('XXXXXXXX')) {
-                for (const proxy of CORS_PROXIES) {
-                    try {
-                        const response = await fetch(proxy + encodeURIComponent(SHEET_CSV_URL), {
+            // Якщо не вдалося — беремо з кешу або демо-дані
+            if (!loaded) {
+        
                             method: 'GET',
                             cache: 'no-cache'
                         });
