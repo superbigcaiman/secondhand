@@ -112,7 +112,6 @@
         .admin-btn { width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
         .admin-btn:hover { transform: scale(1.1); }
         .admin-btn.delete { background: #e17055; color: white; }
-        .admin-btn.edit { background: #fdcb6e; color: #2d3436; }
         .admin-btn.sold { background: #00b894; color: white; }
         
         .lightbox-overlay {
@@ -346,7 +345,7 @@
             <div class="empty-state hidden" id="emptyState">
                 <div class="empty-state-icon">📭</div>
                 <h3>Товарів не знайдено</h3>
-                <p>Спробуйте змінити параметри пошуку або додайте новий товар</p>
+                <p>Адміністратор ще не додав товари. Завітайте пізніше!</p>
             </div>
         </div>
     </section>
@@ -505,7 +504,6 @@
             templateId: 'template_lwtt6ro'
         };
 
-        // ✅ ВАШІ РЕАЛЬНІ ЗНАЧЕННЯ
         const GOOGLE_FORM_CONFIG = {
             formId: '1FAIpQLScs8r7FHnR3oK12ANR3S_E2m89Nu59vGeYX-F2SWoMaaeQcag',
             
@@ -520,8 +518,6 @@
         };
 
         const GOOGLE_FORM_URL = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_CONFIG.formId}/formResponse`;
-
-        // ✅ ВАШ CSV URL
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQxPDm_FYfD-Ududwzm89yRP0oI8KcxEy5mPAcSwI0_e5_Cj1yUDco5GYZ765VXAs2l6xsJHJEO4I9h/pub?output=csv';
 
         const ADMIN_CREDENTIALS = {
@@ -529,7 +525,6 @@
             password: 'adminadmin'
         };
 
-        // CORS-проксі для завантаження CSV
         const CORS_PROXIES = [
             'https://api.allorigins.win/raw?url=',
             'https://corsproxy.io/?',
@@ -560,7 +555,6 @@
             
             let loaded = false;
             
-            // Пробуємо завантажити з Google Sheets
             if (SHEET_CSV_URL && !SHEET_CSV_URL.includes('XXXXXXXX')) {
                 for (const proxy of CORS_PROXIES) {
                     try {
@@ -573,7 +567,6 @@
                             const csvText = await response.text();
                             products = parseCSV(csvText);
                             
-                            // Зберігаємо в localStorage як кеш
                             localStorage.setItem('sh_products_cache', JSON.stringify(products));
                             localStorage.setItem('sh_products_cache_time', Date.now().toString());
                             
@@ -588,7 +581,6 @@
                 }
             }
             
-            // Якщо не вдалося — беремо з кешу або демо-дані
             if (!loaded) {
                 const cached = localStorage.getItem('sh_products_cache');
                 
@@ -609,15 +601,12 @@
             const lines = csvText.trim().split('\n');
             if (lines.length < 2) return [];
             
-            const headers = parseCSVLine(lines[0]);
             const result = [];
             
             for (let i = 1; i < lines.length; i++) {
                 const values = parseCSVLine(lines[i]);
                 if (values.length < 2) continue;
                 
-                // Мапінг за індексами колонок (адаптовано під вашу таблицю)
-                // A: Позначка часу, B: Назва, C: Ціна, D: Категорія, E: Опис, F: URL фото, G: Дата, H: status
                 const product = {
                     id: String(Date.now() + i),
                     name: values[1] ? values[1].trim() : 'Без назви',
@@ -903,7 +892,6 @@
                 }
             }
             
-            // Формуємо дані для відправки
             const formData = new FormData();
             formData.append(GOOGLE_FORM_CONFIG.fields.name, name);
             formData.append(GOOGLE_FORM_CONFIG.fields.price, price);
@@ -917,7 +905,6 @@
             try {
                 await submitFormViaIframe(formData);
                 
-                // Додаємо локально для миттєвого відображення
                 const newProduct = {
                     id: String(Date.now()),
                     name,
@@ -1052,7 +1039,8 @@
                 order_comment: formData.get('order_comment') || '',
                 product_name: currentOrderProduct.name,
                 product_price: currentOrderProduct.price + ' грн',
-                product_id: currentOrderProduct.id
+                product_id: currentOrderProduct.id,
+                order_date: new Date().toLocaleString('uk-UA')
             };
             
             showToast('⏳ Відправка замовлення...', 'success');
