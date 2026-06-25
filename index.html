@@ -525,12 +525,6 @@
             password: 'adminadmin'
         };
 
-        const CORS_PROXIES = [
-            'https://api.allorigins.win/raw?url=',
-            'https://corsproxy.io/?',
-            'https://api.codetabs.com/v1/proxy?quest='
-        ];
-
         // ==================== ДАНІ ====================
         let products = [];
         let isAdmin = false;
@@ -549,15 +543,16 @@
         });
 
         // ==================== ЗАВАНТАЖЕННЯ ТОВАРІВ ====================
+        
         async function loadProducts() {
             showLoading(true);
-    
+            
             let loaded = false;
-    
+            
+            // Спробуємо через Netlify Function
             try {
-                // Спробуємо через Netlify Function
                 const response = await fetch('/.netlify/functions/get-products');
-        
+                
                 if (response.ok) {
                     const csvText = await response.text();
                     products = parseCSV(csvText);
@@ -573,30 +568,6 @@
             }
             
             // Якщо не вдалося — беремо з кешу або демо-дані
-            if (!loaded) {
-        
-                            method: 'GET',
-                            cache: 'no-cache'
-                        });
-                        
-                        if (response.ok) {
-                            const csvText = await response.text();
-                            products = parseCSV(csvText);
-                            
-                            localStorage.setItem('sh_products_cache', JSON.stringify(products));
-                            localStorage.setItem('sh_products_cache_time', Date.now().toString());
-                            
-                            loaded = true;
-                            showToast('✅ Товари оновлено з Google Sheets', 'success');
-                            break;
-                        }
-                    } catch (e) {
-                        console.log('Proxy failed:', proxy, e.message);
-                        continue;
-                    }
-                }
-            }
-            
             if (!loaded) {
                 const cached = localStorage.getItem('sh_products_cache');
                 
@@ -1038,68 +1009,51 @@
             openModal('orderModal');
         }
 
-async function sendOrder(e) {
-    e.preventDefault();
-    
-    if (!currentOrderProduct) {
-        showToast('❌ Помилка: товар не вибрано', 'error');
-        return;
-    }
-    
-    const formData = new FormData(e.target);
-    const orderData = {
-        customer_name: formData.get('customer_name'),
-        customer_phone: formData.get('customer_phone'),
-        customer_email: formData.get('customer_email'),
-        customer_address: formData.get('customer_address'),
-        order_comment: formData.get('order_comment') || '',
-        product_name: currentOrderProduct.name,
-        product_price: currentOrderProduct.price + ' грн',
-        product_id: currentOrderProduct.id,
-        order_date: new Date().toLocaleString('uk-UA')
-    };
-    
-    showToast('⏳ Відправка замовлення...', 'success');
-    
-    try {
-        const response = await emailjs.send(
-            EMAILJS_CONFIG.serviceId,
-            EMAILJS_CONFIG.templateId,
-            orderData,
-            EMAILJS_CONFIG.publicKey
-        );
-        
-        console.log('EmailJS response:', response);
-        
-        currentOrderProduct.status = 'sold';
-        localStorage.setItem('sh_products_cache', JSON.stringify(products));
-        
-        closeModal('orderModal');
-        e.target.reset();
-        renderProducts();
-        
-        showToast('✅ Замовлення відправлено! Перевірте email.', 'success');
-        
-    } catch (error) {
-        console.error('EmailJS error:', error);
-        showToast('❌ Помилка EmailJS: ' + error.text, 'error');
-    }
-}
+        async function sendOrder(e) {
+            e.preventDefault();
+            
+            if (!currentOrderProduct) {
+                showToast('❌ Помилка: товар не вибрано', 'error');
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const orderData = {
+                customer_name: formData.get('customer_name'),
+                customer_phone: formData.get('customer_phone'),
+                customer_email: formData.get('customer_email'),
+                customer_address: formData.get('customer_address'),
+                order_comment: formData.get('order_comment') || '',
+                product_name: currentOrderProduct.name,
+                product_price: currentOrderProduct.price + ' грн',
+                product_id: currentOrderProduct.id,
+                order_date: new Date().toLocaleString('uk-UA')
+            };
+            
+            showToast('⏳ Відправка замовлення...', 'success');
+            
+            try {
+                const response = await emailjs.send(
+                    EMAILJS_CONFIG.serviceId,
+                    EMAILJS_CONFIG.templateId,
+                    orderData,
+                    EMAILJS_CONFIG.publicKey
+                );
                 
-                const subject = `Замовлення: ${currentOrderProduct.name}`;
-                const body = `
-Ім'я: ${orderData.customer_name}
-Телефон: ${orderData.customer_phone}
-Email: ${orderData.customer_email}
-Адреса: ${orderData.customer_address}
-Товар: ${currentOrderProduct.name}
-Ціна: ${currentOrderProduct.price} грн
-Коментар: ${orderData.order_comment}
-                `.trim();
+                console.log('EmailJS response:', response);
                 
-                window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                currentOrderProduct.status = 'sold';
+                localStorage.setItem('sh_products_cache', JSON.stringify(products));
                 
-                showToast('📧 Відкрито email-клієнт. Надішліть лист вручну.', 'success');
+                closeModal('orderModal');
+                e.target.reset();
+                renderProducts();
+                
+                showToast('✅ Замовлення відправлено! Перевірте email.', 'success');
+                
+            } catch (error) {
+                console.error('EmailJS error:', error);
+                showToast('❌ Помилка EmailJS: ' + (error.text || error.message), 'error');
             }
         }
 
