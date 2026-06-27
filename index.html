@@ -595,7 +595,7 @@
                 if (values.length < 2) continue;
                 
                 const product = {
-                    id: String(Date.now() + i),
+                    id: values[0] ? values[0].trim() : String(i),  // ← ID з першої колонки таблиці
                     name: values[1] ? values[1].trim() : 'Без назви',
                     price: parseFloat(values[2]) || 0,
                     category: values[3] ? values[3].trim().toLowerCase() : 'інше',
@@ -893,8 +893,13 @@
             try {
                 await submitFormViaIframe(formData);
                 
+                const maxId = products.length > 0 
+                        ? Math.max(...products.map(p => parseInt(p.id) || 0)) 
+                        : 0;
+                const nextId = String(maxId + 1);
+
                 const newProduct = {
-                    id: String(Date.now()),
+                    id: nextId,  // ← наступний номер з таблиці
                     name,
                     price: parseFloat(price),
                     category,
